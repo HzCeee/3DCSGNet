@@ -59,9 +59,10 @@ class Generator:
         if not (type(primitives) is dict):
             # # Draw all primitive in one go and reuse them later
             # sim.draw_all_primitives(self.unique_draw)
-            # self.primitives = sim.draw_all_primitives(self.unique_draw)
-            # dd.io.save("mix_len_all_primitives.h5", self.primitives)
-            self.primitives = dd.io.load('data/primitives.h5')
+            self.primitives = sim.draw_all_primitives(self.unique_draw)
+            dd.io.save("2to3D_primitives.h5", self.primitives)
+            print("Save primitives to file 2to3D_primitives.h5")
+            # self.primitives = dd.io.load('data/primitives.h5')
         else:
             self.primitives = primitives
         self.parser = Parser()
@@ -73,7 +74,8 @@ class Generator:
         :param expression: program expression in postfix notation
         :return program:
         """
-        self.shape_types = ["u", "p", "y"]
+        # self.shape_types = ["u", "p", "y"]
+        self.shape_types = ["s", "c", "t"]
         self.op = ["*", "+", "-"]
         program = []
         for index, value in enumerate(expression):
@@ -102,7 +104,8 @@ class Generator:
         expressions.
         :return: unique_chunks: Unique sorted draw operations in the dataset.
         """
-        shapes = ["u", "p", "y"]
+        # shapes = ["u", "p", "y"]
+        shapes = ["s", "c", "t"]
         chunks = []
         for expression in expressions:
             for i, e in enumerate(expression):

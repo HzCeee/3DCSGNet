@@ -56,10 +56,15 @@ class SimulateStack:
         :param draw_uniques: unique operations (draw + ops)
         """
         self.draw_obj = Draw(canvas_shape=canvas_shape)
+        # self.draw = {
+        #     "u": self.draw_obj.draw_cube,
+        #     "p": self.draw_obj.draw_sphere,
+        #     "y": self.draw_obj.draw_cylinder
+        # }
         self.draw = {
-            "u": self.draw_obj.draw_cube,
-            "p": self.draw_obj.draw_sphere,
-            "y": self.draw_obj.draw_cylinder
+            "s": self.draw_obj.draw_square3D,
+            "c": self.draw_obj.draw_circle3D,
+            "t": self.draw_obj.draw_triangle3D,
         }
         self.op = {"*": self._and, "+": self._union, "-": self._diff}
         self.stack = PushDownStack(max_len, canvas_shape)
@@ -78,23 +83,29 @@ class SimulateStack:
         for index, value in enumerate(draw_uniques[0:-4]):
             p = self.parser.parse(value)[0]
             which_draw = p["value"]
-            if which_draw == "u" or which_draw == "p":
-                # draw cube or sphere
-                x = int(p["param"][0])
-                y = int(p["param"][1])
-                z = int(p["param"][2])
-                radius = int(p["param"][3])
-                layer = self.draw[which_draw]([x, y, z], radius)
+            if which_draw == "s":
+                pass
+            elif which_draw == "c":
+                pass
+            elif which_draw == "t":
+                pass
+            # if which_draw == "u" or which_draw == "p":
+            #     # draw cube or sphere
+            #     x = int(p["param"][0])
+            #     y = int(p["param"][1])
+            #     z = int(p["param"][2])
+            #     radius = int(p["param"][3])
+            #     layer = self.draw[which_draw]([x, y, z], radius)
 
-            elif which_draw == "y":
-                # draw cylinder
-                # TODO check if the order is correct.
-                x = int(p["param"][0])
-                y = int(p["param"][1])
-                z = int(p["param"][2])
-                radius = int(p["param"][3])
-                height = int(p["param"][4])
-                layer = self.draw[p["value"]]([x, y, z], radius, height)
+            # elif which_draw == "y":
+            #     # draw cylinder
+            #     # TODO check if the order is correct.
+            #     x = int(p["param"][0])
+            #     y = int(p["param"][1])
+            #     z = int(p["param"][2])
+            #     radius = int(p["param"][3])
+            #     height = int(p["param"][4])
+            #     layer = self.draw[p["value"]]([x, y, z], radius, height)
             self.primitives[value] = layer
         return self.primitives
 
@@ -110,7 +121,8 @@ class SimulateStack:
         :param expression: program expression in postfix notation
         :return program:
         """
-        shape_types = ["u", "p", "y"]
+        # shape_types = ["u", "p", "y"]
+        shape_types = ["s", "c", "t"]
         op = ["*", "+", "-"]
         program = []
         for index, value in enumerate(expression):
@@ -154,23 +166,31 @@ class SimulateStack:
                     self.stack_t.append(self.stack.get_items())
                     continue
 
-                if p["value"] == "u" or p["value"] == "p":
-                    # draw cube or sphere
-                    x = int(p["param"][0])
-                    y = int(p["param"][1])
-                    z = int(p["param"][2])
-                    radius = int(p["param"][3])
-                    layer = self.draw[p["value"]]([x, y, z], radius)
+                # if p["value"] == "u" or p["value"] == "p":
+                #     # draw cube or sphere
+                #     x = int(p["param"][0])
+                #     y = int(p["param"][1])
+                #     z = int(p["param"][2])
+                #     radius = int(p["param"][3])
+                #     layer = self.draw[p["value"]]([x, y, z], radius)
 
-                elif p["value"] == "y":
-                    # draw cylinder
-                    # TODO check if the order is correct.
-                    x = int(p["param"][0])
-                    y = int(p["param"][1])
-                    z = int(p["param"][2])
-                    radius = int(p["param"][3])
-                    height = int(p["param"][4])
-                    layer = self.draw[p["value"]]([x, y, z], radius, height)
+                # elif p["value"] == "y":
+                #     # draw cylinder
+                #     # TODO check if the order is correct.
+                #     x = int(p["param"][0])
+                #     y = int(p["param"][1])
+                #     z = int(p["param"][2])
+                #     radius = int(p["param"][3])
+                #     height = int(p["param"][4])
+                #     layer = self.draw[p["value"]]([x, y, z], radius, height)
+
+                if p["value"] == "s":
+                    pass
+                elif p["value"] == "c":
+                    pass
+                elif p["value"] == "t":
+                    pass
+
                 self.stack.push(layer)
 
                 # Copy to avoid orver-write
@@ -207,54 +227,63 @@ class Draw:
         """
         self.canvas_shape = canvas_shape
 
-    def draw_sphere(self, center, radius):
-        """Makes sphere inside a cube of canvas_shape
-        :param center: center of the sphere
-        :param radius: radius of sphere
-        :return:
-        """
-        radius -= 1
-        canvas = np.zeros(self.canvas_shape, dtype=bool)
-        for x in range(center[0] - radius, center[0] + radius + 1):
-            for y in range(center[1] - radius, center[1] + radius + 1):
-                for z in range(center[2] - radius, center[2] + radius + 1):
-                    if np.linalg.norm(np.array(center) - np.array(
-                            [x, y, z])) <= radius:
-                        canvas[x, y, z] = True
-        return canvas
+    def draw_square3D(self):
+        pass
 
-    def draw_cube(self, center, side):
-        """Makes cube inside a cube of canvas_shape
-        :param center: center of cube
-        :param side: side of cube
-        :return:
-        """
-        side -= 1
-        canvas = np.zeros(self.canvas_shape, dtype=bool)
-        side = side // 2
-        for x in range(center[0] - side, center[0] + side + 1):
-            for y in range(center[1] - side, center[1] + side + 1):
-                for z in range(center[2] - side, center[2] + side + 1):
-                    canvas[x, y, z] = True
-        return canvas
+    def draw_circle3D(self):
+        pass
 
-    def draw_cylinder(self, center, radius, height):
-        """Makes cylinder inside a of canvas_shape
-        :param center: center of cylinder
-        :param radius: radius of cylinder
-        :param height: height of cylinder
-        :return:
-        """
-        radius -= 1
-        height -= 1
-        canvas = np.zeros(self.canvas_shape, dtype=bool)
+    def draw_triangle3D(self):
+        pass
 
-        for z in range(center[2] - int(height / 2),
-                       center[2] + int(height / 2) + 1):
-            for x in range(center[0] - radius, center[0] + radius + 1):
-                for y in range(center[1] - radius, center[1] + radius + 1):
-                    if np.linalg.norm(
-                                    np.array([center[0], center[1]]) - np.array(
-                                [x, y])) <= radius:
-                        canvas[x, y, z] = True
-        return canvas
+    # def draw_sphere(self, center, radius):
+    #     """Makes sphere inside a cube of canvas_shape
+    #     :param center: center of the sphere
+    #     :param radius: radius of sphere
+    #     :return:
+    #     """
+    #     radius -= 1
+    #     canvas = np.zeros(self.canvas_shape, dtype=bool)
+    #     for x in range(center[0] - radius, center[0] + radius + 1):
+    #         for y in range(center[1] - radius, center[1] + radius + 1):
+    #             for z in range(center[2] - radius, center[2] + radius + 1):
+    #                 if np.linalg.norm(np.array(center) - np.array(
+    #                         [x, y, z])) <= radius:
+    #                     canvas[x, y, z] = True
+    #     return canvas
+
+    # def draw_cube(self, center, side):
+    #     """Makes cube inside a cube of canvas_shape
+    #     :param center: center of cube
+    #     :param side: side of cube
+    #     :return:
+    #     """
+    #     side -= 1
+    #     canvas = np.zeros(self.canvas_shape, dtype=bool)
+    #     side = side // 2
+    #     for x in range(center[0] - side, center[0] + side + 1):
+    #         for y in range(center[1] - side, center[1] + side + 1):
+    #             for z in range(center[2] - side, center[2] + side + 1):
+    #                 canvas[x, y, z] = True
+    #     return canvas
+
+    # def draw_cylinder(self, center, radius, height):
+    #     """Makes cylinder inside a of canvas_shape
+    #     :param center: center of cylinder
+    #     :param radius: radius of cylinder
+    #     :param height: height of cylinder
+    #     :return:
+    #     """
+    #     radius -= 1
+    #     height -= 1
+    #     canvas = np.zeros(self.canvas_shape, dtype=bool)
+
+    #     for z in range(center[2] - int(height / 2),
+    #                    center[2] + int(height / 2) + 1):
+    #         for x in range(center[0] - radius, center[0] + radius + 1):
+    #             for y in range(center[1] - radius, center[1] + radius + 1):
+    #                 if np.linalg.norm(
+    #                                 np.array([center[0], center[1]]) - np.array(
+    #                             [x, y])) <= radius:
+    #                     canvas[x, y, z] = True
+    #     return canvas
