@@ -6,6 +6,8 @@ CSG. Most of the ideas are taken from our previous work on 2D CSG.
 import numpy as np
 from .parser import Parser
 
+from skimage import draw
+
 class PushDownStack(object):
     """Simple PushDown Stack implements in the form of array"""
 
@@ -226,15 +228,49 @@ class Draw:
         :param canvas_shape: shape of the canvas on which to draw objects
         """
         self.canvas_shape = canvas_shape
+        self.fixed_height = canvas_shape[2] // 2
 
-    def draw_square3D(self):
-        pass
+    def draw_square3D(self, center, side):
+        canvas = np.zeros(self.canvas_shape, dtype=bool)
+        half_side = (side - 1) // 2
+        for x in range(center[0] - half_side, center[0] + half_side + 1):
+            for y in range(center[1] - half_side, center[1] + half_side + 1):
+                for z in range(self.fixed_height):
+                    canvas[x, y, z] = True
+        return canvas
 
-    def draw_circle3D(self):
-        pass
+    def draw_circle3D(self, center, radius):
+        canvas = np.zeros(self.canvas_shape, dtype=bool)
+        radius -= 1
+        for z in range(self.fixed_height):
+            for x in range(center[0] - radius, center[0] + radius + 1):
+                for y in range(center[1] - radius, center[1] + radius + 1):
+                    if np.linalg.norm(np.array([center[0], center[1]]) - np.array([x, y])) <= radius:
+                        canvas[x, y, z] = True
+        return canvas
 
-    def draw_triangle3D(self):
-        pass
+    def draw_triangle3D(self, center, radius):
+        # canvas = np.zeros(self.canvas_shape, dtype=bool)
+        # side = 1.732 * radius
+        # rows = [
+        #     int(center[1] + side / (2 * 1.732)),
+        #     int(center[1] + side / (2 * 1.732)),
+        #     int(center[1] - side / 1.732)
+        # ]
+        # cols = [
+        #     int(center[0] - side / 2.0),
+        #     int(center[0] + side / 2.0), 
+        #     center[0]
+        # ]
+
+        # rr_inner, cc_inner = draw.polygon(rows, cols, shape=self.canvas_shape)
+        # rr_boundary, cc_boundary = draw.polygon_perimeter(
+        #     rows, cols, shape=self.canvas_shape)
+
+        # ROWS = np.concatenate((rr_inner, rr_boundary))
+        # COLS = np.concatenate((cc_inner, cc_boundary))
+        # arr[ROWS, COLS] = True
+        # return arr
 
     # def draw_sphere(self, center, radius):
     #     """Makes sphere inside a cube of canvas_shape
