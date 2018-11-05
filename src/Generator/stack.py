@@ -85,12 +85,19 @@ class SimulateStack:
         for index, value in enumerate(draw_uniques[0:-4]):
             p = self.parser.parse(value)[0]
             which_draw = p["value"]
-            if which_draw == "s":
-                pass
-            elif which_draw == "c":
-                pass
-            elif which_draw == "t":
-                pass
+
+            x = int(p["param"][0]) * self.canvas_shape[0] // 64
+            y = int(p["param"][1]) * self.canvas_shape[1] // 64
+            scale = int(p["param"][2]) * self.canvas_shape[0] // 64
+            layer = self.draw[which_draw]([x, y], scale)
+
+            # if which_draw == "s":
+            #     pass
+            # elif which_draw == "c":
+            #     pass
+            # elif which_draw == "t":
+            #     pass
+                
             # if which_draw == "u" or which_draw == "p":
             #     # draw cube or sphere
             #     x = int(p["param"][0])
@@ -186,12 +193,17 @@ class SimulateStack:
                 #     height = int(p["param"][4])
                 #     layer = self.draw[p["value"]]([x, y, z], radius, height)
 
-                if p["value"] == "s":
-                    pass
-                elif p["value"] == "c":
-                    pass
-                elif p["value"] == "t":
-                    pass
+                x = int(p["param"][0]) * self.canvas_shape[0] // 64
+                y = int(p["param"][1]) * self.canvas_shape[1] // 64
+                scale = int(p["param"][2]) * self.canvas_shape[0] // 64
+                layer = self.draw[p["value"]]([x, y], scale)
+
+                # if p["value"] == "s":
+                #     pass
+                # elif p["value"] == "c":
+                #     pass
+                # elif p["value"] == "t":
+                #     pass
 
                 self.stack.push(layer)
 
@@ -231,46 +243,61 @@ class Draw:
         self.fixed_height = canvas_shape[2] // 2
 
     def draw_square3D(self, center, side):
-        canvas = np.zeros(self.canvas_shape, dtype=bool)
-        half_side = (side - 1) // 2
-        for x in range(center[0] - half_side, center[0] + half_side + 1):
-            for y in range(center[1] - half_side, center[1] + half_side + 1):
-                for z in range(self.fixed_height):
-                    canvas[x, y, z] = True
-        return canvas
+        arr = np.zeros(self.canvas_shape, dtype=bool)
+        length *= 1.412
+        # generate the row vertices
+        rows = np.array([
+            int(center[0] - length / 2.0),
+            int(center[0] + length / 2.0),
+            int(center[0] + length / 2.0),
+            int(center[0] - length / 2.0)
+        ])
+        cols = np.array([
+            int(center[1] + length / 2.0),
+            int(center[1] + length / 2.0),
+            int(center[1] - length / 2.0),
+            int(center[1] - length / 2.0)
+        ])
+
+        # generate the col vertices
+        rr_inner, cc_inner = draw.polygon(rows, cols, shape=self.canvas_shape[:2])
+        rr_boundary, cc_boundary = draw.polygon_perimeter(rows, cols, shape=self.canvas_shape[:2])
+
+        ROWS = np.concatenate((rr_inner, rr_boundary))
+        COLS = np.concatenate((cc_inner, cc_boundary))
+
+        arr[COLS, ROWS, :self.fixed_height] = True
+        return arr
 
     def draw_circle3D(self, center, radius):
-        canvas = np.zeros(self.canvas_shape, dtype=bool)
-        radius -= 1
-        for z in range(self.fixed_height):
-            for x in range(center[0] - radius, center[0] + radius + 1):
-                for y in range(center[1] - radius, center[1] + radius + 1):
-                    if np.linalg.norm(np.array([center[0], center[1]]) - np.array([x, y])) <= radius:
-                        canvas[x, y, z] = True
-        return canvas
+        arr = np.zeros(self.canvas_shape, dtype=bool)
+        xp = [center[0] + radius, center[0], center[0], center[0] - radius]
+        yp = [center[1], center[1] + radius, center[1] - radius, center[1]]
+
+        rr, cc = draw.circle(*center, radius=radius, shape=self.canvas_shape[:2])
+        arr[cc, rr, :self.fixed_height] = True
+        return arr
 
     def draw_triangle3D(self, center, radius):
-        # canvas = np.zeros(self.canvas_shape, dtype=bool)
-        # side = 1.732 * radius
-        # rows = [
-        #     int(center[1] + side / (2 * 1.732)),
-        #     int(center[1] + side / (2 * 1.732)),
-        #     int(center[1] - side / 1.732)
-        # ]
-        # cols = [
-        #     int(center[0] - side / 2.0),
-        #     int(center[0] + side / 2.0), 
-        #     center[0]
-        # ]
+        arr = np.zeros(self.canvas_shape, dtype=bool)
+        length = 1.732 * length
+        rows = [
+            int(center[1] + length / (2 * 1.732)),
+            int(center[1] + length / (2 * 1.732)),
+            int(center[1] - length / 1.732)
+        ]
+        cols = [
+            int(center[0] - length / 2.0),
+            int(center[0] + length / 2.0), center[0]
+        ]
 
-        # rr_inner, cc_inner = draw.polygon(rows, cols, shape=self.canvas_shape)
-        # rr_boundary, cc_boundary = draw.polygon_perimeter(
-        #     rows, cols, shape=self.canvas_shape)
+        rr_inner, cc_inner = draw.polygon(rows, cols, shape=self.canvas_shape[:2])
+        rr_boundary, cc_boundary = draw.polygon_perimeter(rows, cols, shape=self.canvas_shape[:2])
 
-        # ROWS = np.concatenate((rr_inner, rr_boundary))
-        # COLS = np.concatenate((cc_inner, cc_boundary))
-        # arr[ROWS, COLS] = True
-        # return arr
+        ROWS = np.concatenate((rr_inner, rr_boundary))
+        COLS = np.concatenate((cc_inner, cc_boundary))
+        arr[ROWS, COLS, :self.fixed_height] = True
+        return arr
 
     # def draw_sphere(self, center, radius):
     #     """Makes sphere inside a cube of canvas_shape
