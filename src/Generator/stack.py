@@ -86,9 +86,9 @@ class SimulateStack:
             p = self.parser.parse(value)[0]
             which_draw = p["value"]
 
-            x = int(p["param"][0]) * self.canvas_shape[0] // 64
-            y = int(p["param"][1]) * self.canvas_shape[1] // 64
-            scale = int(p["param"][2]) * self.canvas_shape[0] // 64
+            x = int(p["param"][0])
+            y = int(p["param"][1])
+            scale = int(p["param"][2])
             layer = self.draw[which_draw]([x, y], scale)
 
             # if which_draw == "s":
