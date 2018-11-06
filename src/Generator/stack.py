@@ -242,7 +242,7 @@ class Draw:
         self.canvas_shape = canvas_shape
         self.fixed_height = canvas_shape[2] // 2
 
-    def draw_square3D(self, center, side):
+    def draw_square3D(self, center, length):
         arr = np.zeros(self.canvas_shape, dtype=bool)
         length *= 1.412
         # generate the row vertices
@@ -278,7 +278,7 @@ class Draw:
         arr[cc, rr, :self.fixed_height] = True
         return arr
 
-    def draw_triangle3D(self, center, radius):
+    def draw_triangle3D(self, center, length):
         arr = np.zeros(self.canvas_shape, dtype=bool)
         length = 1.732 * length
         rows = [
