@@ -44,9 +44,11 @@ data_labels_paths = {3: "data/one_op/expressions.txt",
 proportion = config.proportion  # proportion is in percentage. vary from [1, 100].
 
 # First is training size and second is validation size per program length
-dataset_sizes = {3: [proportion * 1000, proportion * 250],
-                 5: [proportion * 2000, proportion * 500],
-                 7: [proportion * 4000, proportion * 100]}
+dataset_sizes = {
+    3: [proportion * 250, proportion * 50],
+    5: [proportion * 1000, proportion * 100],
+    7: [proportion * 1500, proportion * 200]
+}
 
 config.train_size = sum(dataset_sizes[k][0] for k in dataset_sizes.keys())
 config.test_size = sum(dataset_sizes[k][1] for k in dataset_sizes.keys())
