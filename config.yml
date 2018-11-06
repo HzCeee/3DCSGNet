@@ -1,7 +1,7 @@
-comment = "Write a meaningful comment about the experiment."
+comment = "2to3D Exp."
 
 [train]
-model_path = exp_prop_{}_top_{}_hdsz_{}_batch_{}_optim_{}_lr_{}_wd_{}_drop_{}_step_{}_mode_{}
+model_path = 2to3D_exp_prop_{}_top_{}_hdsz_{}_batch_{}_optim_{}_lr_{}_wd_{}_drop_{}_step_{}_mode_{}
 
 # proportion of the dataset to train or test on
 proportion = 100
